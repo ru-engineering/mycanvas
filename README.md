@@ -6,3 +6,8 @@ cleaner.py:  Deletes all the default template pages and elements when a new cour
 introeng-participation.py:  Creates standardizes "easy" quizzes to test if students are present at the beginning of the intro to engineering course.
 
 mycanvas.py:  Library functions to support working with the CANVAS API more smoothly.
+
+
+TODO:
+  Notes on how to get the CANVAS API Key
+  Notes on installing canvasapi python module first
