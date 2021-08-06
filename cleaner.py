@@ -5,7 +5,10 @@
 """Cleanup tool for deleting template elements before importing content from previous course
 Developed by Joseph T. Foley <foley at RU dot IS> as part of the canvas-tools project
 Started 2020-06-02
-Project home https://project.cs.ru.is/projects/canvas-tools
+Project home https://github.com/ru-engineering/mycanvas
+
+Debian prerequisites:  canvasapi
+  pip install canvasapi
 """
 import os
 import os.path
