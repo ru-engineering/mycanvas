@@ -47,9 +47,7 @@ PARSER.add_argument('-A', '--answers', default="10",
 PARSER.add_argument('-a', '--assignmentid',
                     help='What is the assignment ID? (Look at URL in CANVAS)')
 PARSER.add_argument('--calculator',
-                    help='')
-
-
+                    help='No CANVAS interaction, help calculate grades')
 
 ARGS = PARSER.parse_args()
 MC = mycanvas.MyCanvas(args=ARGS)
@@ -68,8 +66,12 @@ mylog.info("Writing output to %s" % outfilename)
 #mylog.debug("File logging set at %s", floglevel)
 #mylog.debug("Console logging level at %s", cloglevel)
 
+if ARGS.calculator:
+    ## Starting here:  start with the calculations until I can automate
+
+
 users = MC.course.get_users(enrollment_type=['student'])
 
-for user in users:
-    print(user.login_id)
-    # use dir(user) to find the field names
+# for user in users:
+#     print(user.login_id)
+#     # use dir(user) to find the field names
