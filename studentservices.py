@@ -40,7 +40,7 @@ PARSER.add_argument('-c', '--configfile',
                     help='configuration file location (override)')
 PARSER.add_argument('-s', '--site', default="production",
                     help='Site to interact with:  test, beta, or production(default)')
-PARSER.add_argument('-F', '--fields', default="username",
+PARSER.add_argument('-F', '--fields', default="login_id",
                     help='What student information to extact')
 
 ARGS = PARSER.parse_args()
@@ -63,5 +63,5 @@ mylog.info("Writing output to %s" % outfilename)
 users = MC.course.get_users(enrollment_type=['student'])
 
 for user in users:
-    print(getattr(user, 'login_id'))
+    print(getattr(user, ARGS.fields))
     # use dir(user) to find the field names
