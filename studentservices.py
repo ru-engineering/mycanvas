@@ -42,6 +42,9 @@ PARSER.add_argument('-s', '--site', default="production",
                     help='Site to interact with:  test, beta, or production(default)')
 PARSER.add_argument('-F', '--fields', default="login_id",
                     help='What student information to extact')
+PARSER.add_argument('--dumpfields', action="store_true",
+                    help='Dump all the fields')
+
 
 ARGS = PARSER.parse_args()
 MC = mycanvas.MyCanvas(args=ARGS)
@@ -62,6 +65,9 @@ mylog.info("Writing output to %s" % outfilename)
 
 users = MC.course.get_users(enrollment_type=['student'])
 
+if ARGS.dumpfields:
+    print(dir(users[0]))
+    sys.exit(0)
+
 for user in users:
     print(getattr(user, ARGS.fields))
-    # use dir(user) to find the field names
