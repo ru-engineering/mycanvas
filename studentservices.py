@@ -63,5 +63,5 @@ mylog.info("Writing output to %s" % outfilename)
 users = MC.course.get_users(enrollment_type=['student'])
 
 for user in users:
-    print(user.login_id)
+    print(getattr(user, 'login_id'))
     # use dir(user) to find the field names
