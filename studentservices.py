@@ -13,7 +13,7 @@ Debian prerequisites:  canvasapi
 import os
 import os.path
 import argparse
-import sys
+import sysx
 import logging
 import canvasapi
 import mycanvas
@@ -63,5 +63,5 @@ mylog.info("Writing output to %s" % outfilename)
 users = MC.course.get_users(enrollment_type=['student'])
 
 for user in users:
-    print(user.login_id)
+    print(user.email) #login_id if you jsut want username
     # use dir(user) to find the field names
