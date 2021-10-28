@@ -9,6 +9,7 @@ Project home https://project.cs.ru.is/projects/canvas-tools
 API keys can be created under 'Approved Integrations' in profile/settings
 
 Install:
+apt install python3-pip
 pip3 install canvasapi
 """
 
