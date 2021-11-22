@@ -13,7 +13,7 @@ Debian prerequisites:  canvasapi
 import os
 import os.path
 import argparse
-import sysx
+import sys
 import logging
 import canvasapi
 import mycanvas
@@ -70,8 +70,18 @@ if ARGS.dumpfields:
     sys.exit(0)
 
 for user in users:
-    print(user.email) #login_id if you jsut want username
+    output = ""
+    if ARGS.fields == "username":
+        output = user.login_id
+    elif ARGS.fields == "name":
+        output = user.name  # full name
+    elif ARGS.fields == "email":
+        output = user.email  #login_id if you just want username
+    elif ARGS.fields == "fullemail":
+        output = f"{user.name} <{user.email}>"  # full name with email
+    else:
+        output = f"{user.name} <{user.email}>"  # full name with email is a good default
+    print(output)
     # print(getattr(user, ARGS.fields)) to get the fields
     # use dir(user) to find the field names
 
->>>>>>> 811838c3af216d75e5e41fb97c68031f3af9a475
