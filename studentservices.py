@@ -73,5 +73,3 @@ for user in users:
     print(user.email) #login_id if you jsut want username
     # print(getattr(user, ARGS.fields)) to get the fields
     # use dir(user) to find the field names
-
->>>>>>> 811838c3af216d75e5e41fb97c68031f3af9a475
