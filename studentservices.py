@@ -13,7 +13,7 @@ Debian prerequisites:  canvasapi
 import os
 import os.path
 import argparse
-import sysx
+import sys
 import logging
 import canvasapi
 import mycanvas
