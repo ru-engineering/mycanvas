@@ -64,16 +64,31 @@ mylog.info("Writing output to %s" % outfilename)
 #mylog.debug("File logging set at %s", floglevel)
 #mylog.debug("Console logging level at %s", cloglevel)
 
-
 # first we build a section database
 # https://canvas.instructure.com/doc/api/sections.htlm
-sections = MC.course.get_sections()
+sections = MC.course.get_sections(include=['total_students'])
+## total_students can be used to ignore the un-used sections
 SECTIONDB = {}
 for section in sections:
     (id, name) = (section.id,section.name)
     mylog.info(f"section {id}:{name}")
     SECTIONDB[id]=name
 
+STUDENTDB = {}
+# Get the enrollements and start building main database
+# https://canvas.instructure.com/doc/api/enrollments.html
+enrollments = MC.course.get_enrollments(role=['StudentEnrollment'])
+## not sure what to do with Prófa nemanda (EN: test user)
+for enrollment in enrollments:
+    # each enrollment has a user field
+    # in some ways this is like a meta-user
+    user = enrollment.user
+    section_id = enrollment.course_section_id
+    section = SECTIONDB[section_id]
+    mylog.info(f"enrollment id:{enrollment.id} in section {section}: user({user['id']}){user['sortable_name']}")
+    #print(dir(user))
+
+sys.exit(0)
 # now group database
 # https://canvas.instructure.com/doc/api/groups.html#method.groups.context_index
 groups = MC.course.get_groups(include=['users'])
@@ -83,9 +98,6 @@ for group in groups:
     mylog.info(f"group {id}:{name}")
     GROUPDB[id]=name
 
-# now go through the enrollments checking the section
-# https://canvas.instructure.com/doc/api/enrollments.html
-enrollments = MC.course.get_enrollments()
 
 #if ARGS.dumpfields:
 #    print(dir(users[0]))
