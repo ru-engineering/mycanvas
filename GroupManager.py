@@ -18,6 +18,7 @@ import sys
 import logging
 import canvasapi
 import sqlite3
+from openpyxl import Workbook
 
 import mycanvas
 
@@ -117,12 +118,22 @@ class GroupManager(object):
             cur.execute("INSERT INTO users VALUES(?,?,?)",record)            
             mylog.info(f"user {record}")
         self.dbcon.commit()
-        
 
             
-    def dump(self):
+    def dump(self, filepath=None):
         "Dump out the database nicely"
+        if not filepath:
+            filepath = self.mycanvas.course.course_code+"-groups.xlsx"
+            
         cur = self.dbcon.cursor()
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "GroupManager"
+        columnheadings = ["login_id","name","Section","Group"]
+        # setup the headings
+        for col in range(1,5):
+            ws.cell(row=1,column=col,value=columnheadings[col-1])
+        datarowindex = 2
         for row in cur.execute("""
         SELECT users.login_id, user_sortable_name, 
         sections.name, groups.name FROM enrollments
@@ -134,6 +145,11 @@ class GroupManager(object):
         ON groups.id = enrollments.group_id
         """):
             print(row)
+            for col in range(1,5):
+                ws.cell(row=datarowindex,column=col,value=row[col-1])
+            datarowindex+=1
+        self.mylog.info(f"Saving dump to {filepath}")
+        wb.save(filepath)
 
 if __name__ == "__main__":
     ### Parsing our arguments
