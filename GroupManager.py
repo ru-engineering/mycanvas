@@ -71,13 +71,12 @@ class GroupManager(object):
         ## total_students can be used to ignore the un-used sections
         for section in sections:
             record = (section.id,section.name)
-            cur.execute(f"INSERT INTO sections VALUES(?, ?)", record)            
+            cur.execute("INSERT INTO sections VALUES(?, ?)", record)            
             mylog.info(f"section: {record}")            
         self.dbcon.commit()
 
         cur.execute("DROP TABLE IF EXISTS enrollments")
-        cur.execute("CREATE TABLE enrollments(id, section, user, user_sortable_name)")
-        
+        cur.execute("CREATE TABLE enrollments(id, section, user_id, user_sortable_name, group_id )")    
         # Get the enrollements and start building main database
         # https://canvas.instructure.com/doc/api/enrollments.html
         enrollments = mc.course.get_enrollments(role=['StudentEnrollment'])
@@ -87,24 +86,54 @@ class GroupManager(object):
             # in some ways this is like a meta-user
             user = enrollment.user
             section_id = enrollment.course_section_id
-            record = (enrollment.id, section_id, user['id'],user['sortable_name'])
-            cur.execute(f"INSERT INTO enrollments VALUES(?,?,?,?)",record)            
-            #section = SECTIONDB[section_id]
-            #mylog.info(f"enrollment id:{enrollment.id} in section {section_id}: user({user['id']}){user['sortable_name']}") #
+            record = (enrollment.id, section_id, user['id'],user['sortable_name'],0)
+            # 0 is placeholder for group later
+            cur.execute("INSERT INTO enrollments VALUES(?,?,?,?,?)",record)            
             mylog.info(f"enrollment {record}")
-
         self.dbcon.commit()
+
+        groups = mc.course.get_groups(include=['users'])
+        for group in groups:
+            record = (group.id,group.name)
+            cur.execute("INSERT INTO groups VALUES(?,?)",record)
+            mylog.info(f"group {record}")
+            # now we need to put an entry on the enrollment for each user
+            for user in group.users:
+                #print(user)
+                cur.execute("UPDATE enrollments SET group_id = ? WHERE user_id = ?;", (group.id, user['id']))
+        self.dbcon.commit()
+
+        return()#debugging
+    
+        # we also need the user database for the login_id
+        cur.execute("DROP TABLE IF EXISTS users")
+        cur.execute("CREATE TABLE users(id, login_id, name)")    
+        # https://canvas.instructure.com/doc/api/userss.html
+        users = mc.course.get_users(enrollment_type=['student'])
+        for user in users:
+            record = (user.id, user.login_id, user.name)
+            cur.execute("INSERT INTO users VALUES(?,?,?)",record)            
+            mylog.info(f"user {record}")
+        self.dbcon.commit()
+        
         # now group database
         # https://canvas.instructure.com/doc/api/groups.html#method.groups.context_index
         cur.execute("DROP TABLE IF EXISTS groups")
         cur.execute("CREATE TABLE groups(id, name)")
 
-        groups = mc.course.get_groups(include=['users'])
-        for group in groups:
-            record = (group.id,group.name)
-            cur.execute(f"INSERT INTO groups VALUES(?,?)",record)            
-            mylog.info(f"group {record}")
             
+    def dump(self):
+        "Dump out the database nicely"
+        cur = self.dbcon.cursor()
+        for row in cur.execute("""
+        SELECT user_id, user_sortable_name, 
+        sections.name, groups.name FROM enrollments 
+        INNER JOIN sections 
+        ON sections.id = enrollments.section
+        INNER JOIN groups
+        ON groups.id = enrollments.group_id
+        """):
+            print(row)
 
 if __name__ == "__main__":
     ### Parsing our arguments
@@ -127,6 +156,10 @@ if __name__ == "__main__":
     GM = GroupManager(ARGS)    
     if ARGS.action == "load":
         GM.load_from_net()
+    elif ARGS.action == "dump":
+        # dump to screen by default
+        GM.dump()
+    
 
 #if ARGS.dumpfields:
 #    print(dir(users[0]))
