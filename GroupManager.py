@@ -92,6 +92,10 @@ class GroupManager(object):
             mylog.info(f"enrollment {record}")
         self.dbcon.commit()
 
+        # now group database
+        # https://canvas.instructure.com/doc/api/groups.html#method.groups.context_index
+        cur.execute("DROP TABLE IF EXISTS groups")
+        cur.execute("CREATE TABLE groups(id, name)")
         groups = mc.course.get_groups(include=['users'])
         for group in groups:
             record = (group.id,group.name)
@@ -102,8 +106,6 @@ class GroupManager(object):
                 #print(user)
                 cur.execute("UPDATE enrollments SET group_id = ? WHERE user_id = ?;", (group.id, user['id']))
         self.dbcon.commit()
-
-        return()#debugging
     
         # we also need the user database for the login_id
         cur.execute("DROP TABLE IF EXISTS users")
@@ -116,18 +118,16 @@ class GroupManager(object):
             mylog.info(f"user {record}")
         self.dbcon.commit()
         
-        # now group database
-        # https://canvas.instructure.com/doc/api/groups.html#method.groups.context_index
-        cur.execute("DROP TABLE IF EXISTS groups")
-        cur.execute("CREATE TABLE groups(id, name)")
 
             
     def dump(self):
         "Dump out the database nicely"
         cur = self.dbcon.cursor()
         for row in cur.execute("""
-        SELECT user_id, user_sortable_name, 
-        sections.name, groups.name FROM enrollments 
+        SELECT users.login_id, user_sortable_name, 
+        sections.name, groups.name FROM enrollments
+        INNER JOIN users
+        ON users.id = enrollments.user_id
         INNER JOIN sections 
         ON sections.id = enrollments.section
         INNER JOIN groups
