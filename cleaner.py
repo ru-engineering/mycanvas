@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 # pylint: disable=line-too-long,star-args 
 # pychecker: disable=line-too-long disable=star-args
@@ -32,7 +32,7 @@ DEVNULL = open(os.devnull, 'wb')
 
 ### Parsing our arguments
 PARSER = argparse.ArgumentParser(
-    description='Library for working with CANVAS REST API V.1')
+    description='Clean useless template files to prepare for import')
 PARSER.add_argument('--version', action="version", version="%(prog)s 0.1")  #version init was depricated
 PARSER.add_argument('course',#required!
                     help='Which course to connect with')
@@ -41,7 +41,7 @@ PARSER.add_argument('-c', '--configfile',
 PARSER.add_argument('-s', '--site', default="test",
                     help='Site to interact with:  test(default), beta, or production')
 PARSER.add_argument('-d', '--elements', default="pages",
-                    help='Elements to delete: pages, modules, assignment_groups, template')
+                    help='Elements to delete: pages, modules, rubrics, assignment_groups, template')
 PARSER.add_argument('-f', '--noconfirm', action='store_true',
                     help="Don't confirm deletion")
 
@@ -120,7 +120,18 @@ if ARGS.elements == "modules"  or ARGS.elements == "template":
             module.delete()
         else:
             mylog.info("Skipping '%s'", module)
-       
+
+
+if ARGS.elements == "rubrics" or ARGS.elements == "template":
+    mylog.info("Preparing to delete rubrics")
+    for rubric in MC.course.get_rubrics():
+        mylog.info("Considering rubric: %s", rubric)
+        if query_yes_no(f"Delete module '{rubric}'?", default=None):
+            mylog.info("Deleting '%s'", rubric)
+            rubric.delete()
+        else:
+            mylog.info("Skipping '%s'", rubric)
+
 
 if ARGS.elements == "assignment_groups"  or ARGS.elements == "template":
     mylog.info("Preparing to delete assignment_groups")

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 # pylint: disable=line-too-long,star-args 
 # pychecker: disable=line-too-long disable=star-args
@@ -84,4 +84,3 @@ for user in users:
     print(output)
     # print(getattr(user, ARGS.fields)) to get the fields
     # use dir(user) to find the field names
-
