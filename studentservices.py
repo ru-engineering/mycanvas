@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 # pylint: disable=line-too-long,star-args 
 # pychecker: disable=line-too-long disable=star-args
