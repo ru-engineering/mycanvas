@@ -3,6 +3,7 @@
 # pylint: disable=line-too-long,star-args 
 # pychecker: disable=line-too-long disable=star-args
 """Tool to look at submitted files and apply a heuristic
+For now, we have hardcoded PDF checking: modularize later
 Developed by Joseph T. Foley <foley at RU dot IS> as part of the canvas-tools project
 Started 2026-03-04
 Project home https://github.com/ru-engineering/mycanvas
@@ -16,8 +17,13 @@ import os.path
 import argparse
 import sys
 import logging
+from pathlib import PurePath
+from decimal import Decimal
+import decimal
+from PyPDF2 import PdfReader
 import canvasapi
 import mycanvas
+
 
 
 # http://stackoverflow.com/questions/8299270/ultimate-answer-to-relative-python-imports
@@ -43,6 +49,12 @@ PARSER.add_argument('-c', '--configfile',
                     help='configuration file location (override)')
 PARSER.add_argument('-s', '--site', default="beta",
                     help='Site to interact with:  test, beta, or production(default)')
+PARSER.add_argument('--kbmax', default="200",
+                    help="Max page size in KB")
+PARSER.add_argument('--kbthresh', default="2000",
+                    help="Files below this threshold accepted regardless of pagecount")
+PARSER.add_argument('--penalty', default="5",
+                    help="Penalty for oversize")
 
 ARGS = PARSER.parse_args()
 MC = mycanvas.MyCanvas(args=ARGS)
@@ -67,16 +79,44 @@ assignment = MC.course.get_assignment(ARGS.assignment)
 # hint for downloading files
 # https://github.com/ucfopen/canvasapi/discussions/634
 
-#for user in users:
-user = users[0]
-print(f"{user.login_id}({user.id})")
-sub = assignment.get_submission(user.id)
-if len(sub.attachments) > 0:
+def pdfpagecount(inpath):
+    with open(inpath, mode="rb") as infd:
+        #pdfdoc = PdfFileReader(infd)
+        pdfdoc = PdfReader(infd)
+        totalpages = len(pdfdoc.pages)
+        #print(f"{inpath} has {totalpages} pages.")
+        return totalpages
+decimal.getcontext().prec=5
+
+for user in users:
+    print(f"{user.login_id}({user.id})")
+    sub = assignment.get_submission(user.id)
+    if len(sub.attachments) == 0:
+        print("no files")
+        continue
+    
     thefile = sub.attachments[-1]
-    #tempfilename = f"a{sub.assignment_id}_u{sub.user_id}_{thefile}"
-    subfile = f"{thefile}"
-    print(f"Downloading for {user}: {subfile}")
-    thefile.download(subfile)
+    filepath = f"a{sub.assignment_id}_u{sub.user_id}_{thefile}"
+    realfile = thefile
+    print(f"Downloading for {user}: {filepath}")
+    thefile.download(filepath)
+    count = pdfpagecount(filepath)
+    maxsizekb = Decimal(count)*200
+    size = Decimal(os.path.getsize(filepath))
+    sizekb = size/Decimal(1024)
+    sizemb = sizekb/Decimal(1024)
+
+    commentstr = "Well done."#assume met the size requirement
+    if sizekb > maxsizekb:
+        if sizekb <= Decimal(ARGS.kbthresh):
+            commentstr = "File is under stated 2000KB threshold."
+        else:
+            commentstr = "File does not meet size requirement on assignment (-5)"
+
+    print(f"{realfile} has {count} pages so max allowed size is {maxsizekb}KB.")
+    print(f"Submitted file size is {sizekb}KB. {commentstr}")
+
+    break#testing
 #print(f"file:{filetoeval}")
 
 
