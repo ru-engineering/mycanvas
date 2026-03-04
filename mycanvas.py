@@ -70,7 +70,7 @@ class MyCanvas(object):
 
         # setup the config file
         configpaths = [args.configfile, "./mycanvas.ini", "~/.mycanvas.ini"]
-        cp = configparser.SafeConfigParser()
+        cp = configparser.ConfigParser()
         configfile = None
         def checkfile(filepath):
             return os.path.isfile(filepath) and os.access(filepath, os.R_OK)
