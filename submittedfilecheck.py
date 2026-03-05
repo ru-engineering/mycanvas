@@ -94,6 +94,7 @@ for user in users:
     if len(sub.attachments) == 0:
         print("no files")
         continue
+    # TODO:  check if this already has feedback    
     
     thefile = sub.attachments[-1]
     filepath = f"a{sub.assignment_id}_u{sub.user_id}_{thefile}"
@@ -109,14 +110,17 @@ for user in users:
     commentstr = "Well done."#assume met the size requirement
     if sizekb > maxsizekb:
         if sizekb <= Decimal(ARGS.kbthresh):
-            commentstr = "File is under stated 2000KB threshold."
+            commentstr = "File is under 2000KB threshold."
         else:
-            commentstr = "File does not meet size requirement on assignment (-5)"
+            commentstr = "File does not meet size requirement on assignment (-5%)."
 
     print(f"{realfile} has {count} pages so max allowed size is {maxsizekb}KB.")
     print(f"Submitted file size is {sizekb}KB. {commentstr}")
 
+    # TODO: Upload commentstr to assignment
     break#testing
+
+
 #print(f"file:{filetoeval}")
 
 
