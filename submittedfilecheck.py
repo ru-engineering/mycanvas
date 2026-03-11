@@ -113,7 +113,7 @@ for user in users:
     size = Decimal(os.path.getsize(filepath))
     sizekb = size/Decimal(1024)
     sizemb = sizekb/Decimal(1024)
-
+    os.unlink(filepath)#cleanup
     judgementstr = "File meets size requirements. Well done."#assume met the size requirement
     if sizekb > maxsizekb:
         if sizekb <= Decimal(ARGS.kbthresh):
