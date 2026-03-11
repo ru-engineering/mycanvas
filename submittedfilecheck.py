@@ -88,6 +88,16 @@ def pdfpagecount(inpath):
         return totalpages
 decimal.getcontext().prec=5
 
+# help from https://siever.info/canvas/GetAllComments.py
+for user in users:
+    print(f"{user.login_id}({user.id})")
+    sub = assignment.get_submission(user.id, include=['submission_comments'])
+    for c in sub.submission_comments:
+        print(c['comment'])
+
+sys.exit(0)#debugging
+
+
 for user in users:
     print(f"{user.login_id}({user.id})")
     sub = assignment.get_submission(user.id)
@@ -107,18 +117,17 @@ for user in users:
     sizekb = size/Decimal(1024)
     sizemb = sizekb/Decimal(1024)
 
-    commentstr = "Well done."#assume met the size requirement
+    judgementstr = "File meets size requirements. Well done."#assume met the size requirement
     if sizekb > maxsizekb:
         if sizekb <= Decimal(ARGS.kbthresh):
-            commentstr = "File is under 2000KB threshold."
+            judgementstr = "File is under 2000KB threshold."
         else:
-            commentstr = "File does not meet size requirement on assignment (-5%)."
-
-    print(f"{realfile} has {count} pages so max allowed size is {maxsizekb}KB.")
-    print(f"Submitted file size is {sizekb}KB. {commentstr}")
+            judgementstr = "File does not meet size requirement on assignment (-5%)."
+    commentstr = f"{realfile} has {count} pages so max allowed size is {maxsizekb}KB.\nSubmitted file size is {sizekb}KB. {judgementstr}"
 
     # TODO: Upload commentstr to assignment
-    break#testing
+    subadj = {'comment':{'text_comment':commentstr}}
+    sub.edit(submission=subadj)
 
 
 #print(f"file:{filetoeval}")
