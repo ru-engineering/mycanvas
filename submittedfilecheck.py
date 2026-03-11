@@ -121,22 +121,7 @@ for user in users:
         else:
             judgementstr = "File does not meet size requirement on assignment (-5%)."
     commentstr = f"{realfile} has {count} pages so max allowed size is {maxsizekb}KB.\nSubmitted file size is {sizekb}KB. {judgementstr}"
-    logging.info(f"comment: {commentstr}")
-
-### Trying tempfile    
-    with tempfile.NamedTemporaryFile(delete_on_close=False) as tempfp:
-        tempfp.write(commentstr.encode('utf-8'))
-        tempfp.close()
-        sub.upload_comment(tempfp.name)
-
-    ## Let's use tempfiles and the upload text option
-    ## https://canvasapi.readthedocs.io/en/stable/submission-ref.html
-
-    # TODO: Upload commentstr to assignment
-#    subadj = {'comment':{'text_comment':commentstr}}
-#    sub.edit(submission=subadj)
-
-# this CANVAS project looks promising
-##https://github.com/wwong2025/canvas_comments_upload/blob/main/canvas_comments_upload.py
-
-#print(assignment)
+    mylog.info(f"student: {user.login_id} comment: {commentstr}")
+    ##Inspired by https://github.com/wwong2025/canvas_comments_upload/blob/main/canvas_comments_upload.py
+    sub.edit(comment={"text_comment":commentstr})
+    #break##DEBUG

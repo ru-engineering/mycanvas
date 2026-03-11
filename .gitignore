@@ -133,3 +133,5 @@ dmypy.json
 /mycanvas.ini
 .#-emacs*
 *.db
+.#*
+flycheck_*.py
