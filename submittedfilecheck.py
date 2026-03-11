@@ -18,6 +18,7 @@ import argparse
 import sys
 import logging
 from pathlib import PurePath
+import tempfile
 from decimal import Decimal
 import decimal
 from PyPDF2 import PdfReader
@@ -88,16 +89,12 @@ def pdfpagecount(inpath):
         return totalpages
 decimal.getcontext().prec=5
 
-# help from https://siever.info/canvas/GetAllComments.py
-for user in users:
-    print(f"{user.login_id}({user.id})")
-    sub = assignment.get_submission(user.id, include=['submission_comments'])
-    for c in sub.submission_comments:
-        print(c['comment'])
-
-sys.exit(0)#debugging
-
-
+## help from https://siever.info/canvas/GetAllComments.py
+#for user in users:
+#    print(f"{user.login_id}({user.id})")
+#    sub = assignment.get_submission(user.id, include=['submission_comments'])
+#    for c in sub.submission_comments:
+#        print(c['comment'])
 for user in users:
     print(f"{user.login_id}({user.id})")
     sub = assignment.get_submission(user.id)
@@ -124,13 +121,22 @@ for user in users:
         else:
             judgementstr = "File does not meet size requirement on assignment (-5%)."
     commentstr = f"{realfile} has {count} pages so max allowed size is {maxsizekb}KB.\nSubmitted file size is {sizekb}KB. {judgementstr}"
+    logging.info(f"comment: {commentstr}")
+
+### Trying tempfile    
+    with tempfile.NamedTemporaryFile(delete_on_close=False) as tempfp:
+        tempfp.write(commentstr.encode('utf-8'))
+        tempfp.close()
+        sub.upload_comment(tempfp.name)
+
+    ## Let's use tempfiles and the upload text option
+    ## https://canvasapi.readthedocs.io/en/stable/submission-ref.html
 
     # TODO: Upload commentstr to assignment
-    subadj = {'comment':{'text_comment':commentstr}}
-    sub.edit(submission=subadj)
+#    subadj = {'comment':{'text_comment':commentstr}}
+#    sub.edit(submission=subadj)
 
-
-#print(f"file:{filetoeval}")
-
+# this CANVAS project looks promising
+##https://github.com/wwong2025/canvas_comments_upload/blob/main/canvas_comments_upload.py
 
 #print(assignment)
