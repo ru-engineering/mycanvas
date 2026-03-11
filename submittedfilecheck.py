@@ -97,7 +97,14 @@ decimal.getcontext().prec=5
 #        print(c['comment'])
 for user in users:
     print(f"{user.login_id}({user.id})")
-    sub = assignment.get_submission(user.id)
+    sub = assignment.get_submission(user.id, include=['submission_comments'])
+    ## Hmm.  Slight problem:  my comments don't show up as submission_comments
+    sub_methods = [method_name for method_name in dir(sub)
+                  if callable(getattr(sub, method_name))]
+    sub_attributes = vars(sub)
+    mylog.debug(sub_methods)
+    mylog.debug(sub_attributes)
+    
     if len(sub.attachments) == 0:
         print("no files")
         continue
@@ -120,8 +127,10 @@ for user in users:
             judgementstr = "File is under 2000KB threshold."
         else:
             judgementstr = "File does not meet size requirement on assignment (-5%)."
-    commentstr = f"{realfile} has {count} pages so max allowed size is {maxsizekb}KB.\nSubmitted file size is {sizekb}KB. {judgementstr}"
+    commentstr = f"FILECHECK:{realfile} has {count} pages so max allowed size is {maxsizekb}KB.\nSubmitted file size is {sizekb}KB. {judgementstr}"
     mylog.info(f"student: {user.login_id} comment: {commentstr}")
     ##Inspired by https://github.com/wwong2025/canvas_comments_upload/blob/main/canvas_comments_upload.py
+    ## TODO:  make idempotent if I can check the existing comments
+    ## So far, I can only look at student comments
     sub.edit(comment={"text_comment":commentstr})
-    #break##DEBUG
+    break##DEBUG
