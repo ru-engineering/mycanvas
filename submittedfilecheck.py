@@ -48,7 +48,7 @@ PARSER.add_argument('assignment',#required!
                     help='Which assignment to look at')
 PARSER.add_argument('-c', '--configfile',
                     help='configuration file location (override)')
-PARSER.add_argument('-s', '--site', default="beta",
+PARSER.add_argument('-s', '--site', default="production",
                     help='Site to interact with:  test, beta, or production(default)')
 PARSER.add_argument('--kbmax', default="200",
                     help="Max page size in KB")
@@ -127,10 +127,11 @@ for user in users:
             judgementstr = "File is under 2000KB threshold."
         else:
             judgementstr = "File does not meet size requirement on assignment (-5%)."
-    commentstr = f"FILECHECK:{realfile} has {count} pages so max allowed size is {maxsizekb}KB.\nSubmitted file size is {sizekb}KB. {judgementstr}"
+    commentstr = f"FILECHECK {realfile} has {count} pages so max allowed size is {maxsizekb}KB.\nSubmitted file size is {sizekb}KB. {judgementstr}"
     mylog.info(f"student: {user.login_id} comment: {commentstr}")
     ##Inspired by https://github.com/wwong2025/canvas_comments_upload/blob/main/canvas_comments_upload.py
     ## TODO:  make idempotent if I can check the existing comments
     ## So far, I can only look at student comments
+    ## It's not clear how to get SpeedGrader comments
     sub.edit(comment={"text_comment":commentstr})
-    break##DEBUG
+    #break##DEBUG
