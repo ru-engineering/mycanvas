@@ -102,8 +102,8 @@ for user in users:
     sub_methods = [method_name for method_name in dir(sub)
                   if callable(getattr(sub, method_name))]
     sub_attributes = vars(sub)
-    mylog.debug(sub_methods)
-    mylog.debug(sub_attributes)
+    #mylog.debug(sub_methods)
+    #mylog.debug(sub_attributes)
     
     if len(sub.attachments) == 0:
         print("no files")
