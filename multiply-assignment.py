@@ -48,6 +48,8 @@ PARSER.add_argument('-s', '--site', default="test",
                     help='Site to interact with:  test(default), beta, or production')
 PARSER.add_argument('--frequency', default="weekly",
                     help='How often to repeat')
+PARSER.add_argument('-i', '--instances', default=1, type=int,
+                    help='How many additional copies do you want?')
 
 
 ARGS = PARSER.parse_args()
@@ -100,7 +102,9 @@ class AssignmentDuplicator(Assignment):
         return Assignment(self._requester, response_json)
 
 
-# let's try it out
 AD = AssignmentDuplicator(template_assignment)
-newassignment = AD.duplicate()
-print(vars(newassignment))
+
+print(f'Duplicating assignment {template_assignment.id}:{template_assignment.name} {ARGS.instances} times')
+for i in range(ARGS.instances):
+    newassignment = AD.duplicate()
+    #print(vars(newassignment))
