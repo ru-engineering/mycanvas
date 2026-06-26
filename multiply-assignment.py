@@ -11,12 +11,14 @@ Debian prerequisites:  canvasapi
   pip install canvasapi
 """
 import argparse
+import datetime as dt
 import logging
 import os
 import os.path
-import pprint
+#import pprint
 import re
 import sys
+
 
 
 import canvasapi
@@ -81,7 +83,7 @@ template_assignment = MC.course.get_assignment(ARGS.assignment)
 #sys.exit(0)
 #template_assignment_vars = vars(template_assignment)
 #print(template_assignment_vars)
-re_namecheck = re.compile('(.*)\s*(\d+)\s*$') #name, number
+re_namecheck = re.compile(r'(.*)\s*(\d+)\s*$') #name, number
 template_name = template_assignment.name
 template_name_match = re_namecheck.match(template_name)
 template_number = 1
@@ -118,19 +120,45 @@ class AssignmentDuplicator(Assignment):
 AD = AssignmentDuplicator(template_assignment)
 
 
-print(f'Duplicating assignment {template_assignment.id}:{template_assignment.name} {ARGS.instances} times')
+print(f'Duplicating assignment {template_assignment.id}:"{template_assignment.name}" {ARGS.instances} times')
 for i in range(ARGS.instances):
     newassignment = AD.duplicate()
     #print(vars(newassignment))
-
-    # Fix the name to increment
-    newnumber = template_number + i + 1
-    position = template_assignment.position + i + 1
+    increment = i + 1
+    # Fix the name and position to increment
+    newnumber = template_number + increment
+    position = template_assignment.position + increment
     newname = f'{template_name} {newnumber}'
-    newassignment.edit(assignment={'name': newname,
-                                   'position': position})
+
+    assignment_settings = {'name': newname,
+                           'position': position}
+
+    delta = dt.timedelta(0)
+    if ARGS.frequency == "weekly":
+        delta = dt.timedelta(weeks=increment)
+
+    # Adjustment to dates
+    dstr = template_assignment.unlock_at
+    if dstr:
+        template_unlock_at = dt.datetime.fromisoformat(dstr)
+        new_unlock_at = template_unlock_at + delta
+        print(f'unlock: {template_unlock_at} -> {new_unlock_at}')
+        assignment_settings['unlock_at'] = new_unlock_at
+        
+    dstr = template_assignment.due_at
+    if dstr:
+        template_due_at = dt.datetime.fromisoformat(dstr)
+        new_due_at = template_due_at + delta
+        print(f'due: {template_due_at} -> {new_due_at}')
+        assignment_settings['due_at'] = new_due_at
+
+    dstr = template_assignment.lock_at
+    if dstr:
+        template_lock_at = dt.datetime.fromisoformat(dstr)
+        new_lock_at = template_lock_at + delta
+        print(f'lock: {template_lock_at} -> {new_lock_at}')
+        assignment_settings['lock_at'] = new_lock_at
+
+    newassignment.edit(assignment=assignment_settings)
     print(f'Created assignment {newname}')
 
-    #TODO:  put the new copies after the previous ones
-
-    #TODO: 
