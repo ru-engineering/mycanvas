@@ -128,6 +128,7 @@ for i in range(ARGS.instances):
     # Fix the name and position to increment
     newnumber = template_number + increment
     position = template_assignment.position + increment
+    # TODO:  figure why it put #10 after #1
     newname = f'{template_name} {newnumber}'
 
     assignment_settings = {'name': newname,
