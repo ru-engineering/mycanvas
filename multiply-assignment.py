@@ -14,7 +14,10 @@ import argparse
 import logging
 import os
 import os.path
+import pprint
+import re
 import sys
+
 
 import canvasapi
 from canvasapi.assignment import Assignment
@@ -51,7 +54,6 @@ PARSER.add_argument('--frequency', default="weekly",
 PARSER.add_argument('-i', '--instances', default=1, type=int,
                     help='How many additional copies do you want?')
 
-
 ARGS = PARSER.parse_args()
 MC = mycanvas.MyCanvas(args=ARGS)
 
@@ -74,8 +76,20 @@ mylog.info("Writing output to %s" % outfilename)
 # We can call it manually then edit the result
 # POST /api/v1/courses/:course_id/assignments/:assignment_id/duplicate
 template_assignment = MC.course.get_assignment(ARGS.assignment)
+#pp = pprint.PrettyPrinter(indent=2, width=80)
+#pp.pprint(vars(template_assignment))
+#sys.exit(0)
 #template_assignment_vars = vars(template_assignment)
 #print(template_assignment_vars)
+re_namecheck = re.compile('(.*)\s*(\d+)\s*$') #name, number
+template_name = template_assignment.name
+template_name_match = re_namecheck.match(template_name)
+template_number = 1
+if template_name_match:
+    template_name, template_number  = template_name_match.group(1, 2)
+    template_number = int(template_number)
+#print(f'name: {template_name}, num: {template_number}')
+
 
 
 class AssignmentDuplicator(Assignment):
@@ -97,14 +111,26 @@ class AssignmentDuplicator(Assignment):
             'courses/{}/assignments/{}/duplicate'.format(self.course_id, self.id),
         )
         response_json = response.json()
-        #print("response: %s", response_json)
         response_json.update(course_id=self.course_id)
         return Assignment(self._requester, response_json)
 
 
 AD = AssignmentDuplicator(template_assignment)
 
+
 print(f'Duplicating assignment {template_assignment.id}:{template_assignment.name} {ARGS.instances} times')
 for i in range(ARGS.instances):
     newassignment = AD.duplicate()
     #print(vars(newassignment))
+
+    # Fix the name to increment
+    newnumber = template_number + i + 1
+    position = template_assignment.position + i + 1
+    newname = f'{template_name} {newnumber}'
+    newassignment.edit(assignment={'name': newname,
+                                   'position': position})
+    print(f'Created assignment {newname}')
+
+    #TODO:  put the new copies after the previous ones
+
+    #TODO: 
