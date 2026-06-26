@@ -72,13 +72,13 @@ mylog.info("Writing output to %s" % outfilename)
 # We can call it manually then edit the result
 # POST /api/v1/courses/:course_id/assignments/:assignment_id/duplicate
 template_assignment = MC.course.get_assignment(ARGS.assignment)
-template_assignment_vars = vars(template_assignment)
-print(template_assignment_vars)
+#template_assignment_vars = vars(template_assignment)
+#print(template_assignment_vars)
 
 
 class AssignmentDuplicator(Assignment):
     def __init__(self, assignment):
-        (requester, attributes) = assignment.requester, assignment.attrs
+        (requester, attributes) = assignment._requester, vars(assignment)
         super(AssignmentDuplicator, self).__init__(requester, attributes)
 
     def duplicate(self):
@@ -95,10 +95,12 @@ class AssignmentDuplicator(Assignment):
             'courses/{}/assignments/{}/duplicate'.format(self.course_id, self.id),
         )
         response_json = response.json()
+        #print("response: %s", response_json)
         response_json.update(course_id=self.course_id)
         return Assignment(self._requester, response_json)
 
 
-## let's try it out
+# let's try it out
 AD = AssignmentDuplicator(template_assignment)
-
+newassignment = AD.duplicate()
+print(vars(newassignment))
