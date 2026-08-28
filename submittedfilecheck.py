@@ -8,10 +8,12 @@ Developed by Joseph T. Foley <foley at RU dot IS> as part of the canvas-tools pr
 Started 2026-03-04
 Project home https://github.com/ru-engineering/mycanvas
 
-Debian prerequisites:  canvasapi
+Debian prerequisites:  canvasapi python3-pypdf2
+  sudo apt install python3-pypdf2
   pip install canvasapi
 It is best to do this in a virtual environment
 """
+## TODO:  deal with multiple files submitted
 import os
 import os.path
 import argparse
@@ -50,9 +52,9 @@ PARSER.add_argument('-c', '--configfile',
                     help='configuration file location (override)')
 PARSER.add_argument('-s', '--site', default="production",
                     help='Site to interact with:  test, beta, or production(default)')
-PARSER.add_argument('--kbmax', default="200",
+PARSER.add_argument('--kbmax', default="300", type=int,
                     help="Max page size in KB")
-PARSER.add_argument('--kbthresh', default="2000",
+PARSER.add_argument('--kbthresh', default="0", type=int,
                     help="Files below this threshold accepted regardless of pagecount")
 PARSER.add_argument('--penalty', default="5",
                     help="Penalty for oversize")
@@ -116,7 +118,7 @@ for user in users:
     print(f"Downloading for {user}: {filepath}")
     thefile.download(filepath)
     count = pdfpagecount(filepath)
-    maxsizekb = Decimal(count)*200
+    maxsizekb = Decimal(count)*ARGS.kbmax
     size = Decimal(os.path.getsize(filepath))
     sizekb = size/Decimal(1024)
     sizemb = sizekb/Decimal(1024)
@@ -124,7 +126,7 @@ for user in users:
     judgementstr = "File meets size requirements. Well done."#assume met the size requirement
     if sizekb > maxsizekb:
         if sizekb <= Decimal(ARGS.kbthresh):
-            judgementstr = "File is under 2000KB threshold."
+            judgementstr = f"File is under {ARGS.kbthresh}KB threshold."
         else:
             judgementstr = "File does not meet size requirement on assignment (-5%)."
     commentstr = f"FILECHECK {realfile} has {count} pages so max allowed size is {maxsizekb}KB.\nSubmitted file size is {sizekb}KB. {judgementstr}"
