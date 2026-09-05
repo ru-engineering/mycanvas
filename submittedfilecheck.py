@@ -56,7 +56,7 @@ PARSER.add_argument('--kbmax', default="300", type=int,
                     help="Max page size in KB")
 PARSER.add_argument('--kbthresh', default="0", type=int,
                     help="Files below this threshold accepted regardless of pagecount")
-PARSER.add_argument('--penalty', default="5",
+PARSER.add_argument('--penalty', default="5", type=int,
                     help="Penalty for oversize")
 
 ARGS = PARSER.parse_args()
@@ -128,7 +128,13 @@ for user in users:
         if sizekb <= Decimal(ARGS.kbthresh):
             judgementstr = f"File is under {ARGS.kbthresh}KB threshold."
         else:
-            judgementstr = "File does not meet size requirement on assignment (-5%)."
+            judgementstr = f"File does not meet size requirement(-{ARGS.penalty}%)."
+            if sub.score is not None:
+                score = sub.score - ARGS.penalty
+            else:
+                score = 0
+            sub.edit(submission={'posted_grade': score})
+
     commentstr = f"FILECHECK {realfile} has {count} pages so max allowed size is {maxsizekb}KB.\nSubmitted file size is {sizekb}KB. {judgementstr}"
     mylog.info(f"student: {user.login_id} comment: {commentstr}")
     ##Inspired by https://github.com/wwong2025/canvas_comments_upload/blob/main/canvas_comments_upload.py
