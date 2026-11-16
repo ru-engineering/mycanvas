@@ -14,6 +14,7 @@ Debian prerequisites:  canvasapi python3-pypdf2
 It is best to do this in a virtual environment
 """
 ## TODO:  deal with multiple files submitted
+## TODO:  check file extensions for non-PDF
 import os
 import os.path
 import argparse
